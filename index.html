@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assignment 3</title>
+</head>
+<body>
+    <h1>Assignment 3</h1>
+    <h2>Vowel and Consonant Counter</h2>
+    <input type="file" id="txtFile" accept=".txt">
+    <button id="uploadButton">Count Vowels and Consonants</button>
+    <div id="fileResult"></div>
+
+    <h2>BMI Calculator</h2>
+    <label>Weight in pounds: <input type="number" id="weight"></label><br><br>
+    <label>Height Feet: <input type="number" id="feet"></label><br><br>
+    <label>Height Inches: <input type="number" id="inches"></label><br><br>
+    <button id="CalculateBMI">Calculate BMI</button>
+    <div id="bmi"></div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+
+            $("#uploadButton").on("click", function() {
+                const fileInput = $("#txtFile")[0];
+                const file = fileInput.files[0];
+
+                if (!file) {
+                    alert("Please upload a text file");
+                    return;
+                }
+
+                const reader = new FileReader();
+
+                reader.onload = function(e) {
+                    const textContent = e.target.result;
+
+                    $.ajax({
+                        url: '/count-vowels-consonants',
+                        type: 'POST',
+                        contentType: 'application/json',
+                        data: JSON.stringify({ text: textContent }),
+                        success: function(response) {
+                            $("#fileResult").html(
+                                "<h3>Results:</h3>" +
+                                "<p>Vowels: " + response.vowels + "</p>" +
+                                "<p>Consonants: " + response.consonants + "</p>" +
+                                "<p>Total Letters: " + response.total + "</p>"
+                              );
+                           }
+                         });
+                };
+
+                reader.readAsText(file);
+            });
+
+
+            $("#CalculateBMI").on("click", function() {
+                const weight = $("#weight").val();
+                const feet = $("#feet").val();
+                const inches = $("#inches").val();
+
+                if (!weight || !feet || inches === "") {
+                    alert("Please fill in all fields!");
+                    return;
+                }
+
+                const bmiData = {
+                    weight: parseFloat(weight),
+                    feet: parseFloat(feet),
+                    inches: parseFloat(inches)
+                };
+
+                $.ajax({
+                    url: '/calculate-bmi',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(bmiData),
+                    success: function(response) {
+                        $("#bmi").html(
+                            "<h3>BMI Results:</h3>" +
+                            "<p>Your BMI: " + response.bmi + "</p>"
+                        );
+
+                 }
+             });
+
+            });
+
+        });
+    </script>
+</body>
+</html>
